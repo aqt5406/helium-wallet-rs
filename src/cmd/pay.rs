@@ -137,7 +137,7 @@ pub struct Payee {
 }
 
 impl FromStr for Payee {
-    type Err = Box<dyn std::error::Error>;
+    type Err = crate::result::Error;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         let mut split = s.split('?');
@@ -149,27 +149,36 @@ impl FromStr for Payee {
             for segment in split {
                 let pos = segment
                     .find('=')
-                    .ok_or_else(|| format!("invalid KEY=value: missing `=`  in `{}`", segment))?;
+                    .ok_or(|| anyhow!("invalid KEY=value: missing `=`  in `{}`", segment))
+                    .map_err(|_| anyhow!("invalid KEY=value: missing `=`  in `{}`", segment))?;
 
                 let key = &segment[..pos];
                 let value = &segment[pos + 1..];
                 match key {
-                    "amount" => amount = Some(value.parse()?),
-                    "memo" => memo = u64::from_b64(value)?,
-                    _ => panic!("Invalid key given"),
-                }
+                    "amount" => {
+                        amount = Some(value.parse()?);
+                        Ok(())
+                    }
+                    "memo" => {
+                        memo = u64::from_b64(value)?;
+                        Ok(())
+                    }
+                    _ => Err(anyhow!("Invalid key given: {}", key)),
+                }?
             }
             Ok(Payee {
                 address: address.parse()?,
                 amount: if let Some(amount) = amount {
-                    amount
+                    Ok(amount)
                 } else {
-                    panic!("Pay transaction must set amount")
-                },
+                    Err(anyhow!("Pay transaction must set amount"))
+                }?,
                 memo,
             })
         } else {
-            panic!("Invalid command syntax. Check --help for more information")
+            Err(anyhow!(
+                "Invalid command syntax. Check --help for more information"
+            ))
         }
     }
 }
