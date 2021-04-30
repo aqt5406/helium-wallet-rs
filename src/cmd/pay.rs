@@ -138,7 +138,7 @@ pub struct Payee {
     memo: u64,
 }
 
-use crate::result::anyhow;
+use crate::result::{anyhow, bail};
 
 impl FromStr for Payee {
     type Err = crate::result::Error;
@@ -161,14 +161,12 @@ impl FromStr for Payee {
                 match key {
                     "amount" => {
                         amount = Some(value.parse()?);
-                        Ok(())
                     }
                     "memo" => {
                         memo = u64::from_b64(value)?;
-                        Ok(())
                     }
-                    _ => Err(anyhow!("Invalid key given: {}", key)),
-                }?
+                    _ => bail!("Invalid key given: {}", key),
+                }
             }
             Ok(Payee {
                 address: address.parse()?,
