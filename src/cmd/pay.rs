@@ -91,11 +91,12 @@ fn print_txn(
     match format {
         OutputFormat::Table => {
             let mut table = Table::new();
-            table.add_row(row!["Payee", "Amount"]);
+            table.add_row(row!["Payee", "Amount", "Memo"]);
             for payment in txn.payments.clone() {
                 table.add_row(row![
                     PublicKey::from_bytes(payment.payee)?.to_string(),
-                    Hnt::from(payment.amount)
+                    Hnt::from(payment.amount),
+                    u64::to_b64(&payment.memo)?
                 ]);
             }
             print_table(&table)?;
@@ -115,6 +116,7 @@ fn print_txn(
                 payments.push(json!({
                     "payee": PublicKey::from_bytes(payment.payee)?.to_string(),
                     "amount": Hnt::from(payment.amount),
+                    "memo": u64::to_b64(&payment.memo)?
                 }))
             }
             let table = json!({
