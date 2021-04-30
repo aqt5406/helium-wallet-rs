@@ -136,6 +136,8 @@ pub struct Payee {
     memo: u64,
 }
 
+use crate::result::anyhow;
+
 impl FromStr for Payee {
     type Err = crate::result::Error;
 
