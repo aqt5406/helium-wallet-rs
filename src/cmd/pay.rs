@@ -144,12 +144,18 @@ impl FromStr for Payee {
     type Err = crate::result::Error;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        // String is of the format:
+        //    <address>?amount=<amount>?memo=<memo>
         let mut split = s.split('?');
 
+        // First segment is always address
         if let Some(address) = split.next() {
-            let mut amount = None;
+            // Memo defaults to 0
             let mut memo = 0;
+            // Initialize amount as option, but we require amount later
+            let mut amount = None;
 
+            // Remaining segments are arguments of the form key=<value>
             for segment in split {
                 let pos = segment
                     .find('=')
