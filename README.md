@@ -52,7 +52,7 @@ encryption password on the command line. Options exist to specify the
 wallet output file and to force overwriting an existing wallet.
 
 A `--seed` option followed by space seprated mnemonic words can be
-used to construct the keys for the wallet.
+used to construct the keys for the wallet. This doesn't allow you to make a new wallet, this is for importing a wallet that has the correct entropy.
 
 
 ### Create a sharded wallet
